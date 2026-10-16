@@ -1,0 +1,15 @@
+{
+  "description" : "Mods for Claude Code, published from Sanduhr.",
+  "name" : "sanduhr-mods",
+  "owner" : {
+    "name" : "estevanhernandez-stack-ed"
+  },
+  "plugins" : [
+    {
+      "description" : "A live now-playing line above the prompt: artist, title and a moving progress bar. On Windows from the media session (YouTube Music in Chrome included); on a Mac from every player through Sanduhr's adapter, or Music and Spotify without it.",
+      "name" : "now-playing",
+      "source" : "./plugins/now-playing",
+      "version" : "0.2.0"
+    }
+  ]
+}
