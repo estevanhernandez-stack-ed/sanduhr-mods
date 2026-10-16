@@ -19,4 +19,10 @@ claude plugin install <plugin>@sanduhr-mods
   claude plugin install now-playing --marketplace estevanhernandez-stack-ed/sanduhr-mods
   ```
 
+- **finish-line** 0.1.0: When a turn creates a tag (git tag, gh release create), a Claude sprite runs across the band above the prompt and crosses a checkered finish line, and the tag's name lands beside it. /finish-line [tag] replays it. Reads nothing, writes nothing, no network.
+
+  ```
+  claude plugin install finish-line --marketplace estevanhernandez-stack-ed/sanduhr-mods
+  ```
+
 <!-- /sanduhr:plugins -->
