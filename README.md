@@ -25,4 +25,10 @@ claude plugin install <plugin>@sanduhr-mods
   claude plugin install finish-line --marketplace estevanhernandez-stack-ed/sanduhr-mods
   ```
 
+- **agent-comms** 0.2.0: A band above the prompt showing every message to another agent that is still waiting on a reply.
+
+  ```
+  claude plugin install agent-comms --marketplace estevanhernandez-stack-ed/sanduhr-mods
+  ```
+
 <!-- /sanduhr:plugins -->

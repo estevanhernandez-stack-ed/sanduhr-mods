@@ -1,0 +1,14 @@
+{
+  "name": "agent-comms",
+  "version": "0.2.0",
+  "description": "A band above the prompt showing every message to another agent that is still waiting on a reply.",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "agentTools": {
+      "type": "string",
+      "title": "Agent tools",
+      "description": "MCP tools that hand a question to another agent, as tool=Label pairs separated by semicolons. Subagents and SendMessage are always tracked.",
+      "default": "mcp__pair__pair_chat=PAIR fleet; mcp__claude_ai_626Labs_Dash__bridge_context_to_architect=dashboard Architect; mcp__626labs-cloud__bridge_context_to_architect=dashboard Architect; mcp__626labs__bridge_context_to_architect=dashboard Architect"
+    }
+  }
+}

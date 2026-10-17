@@ -1,21 +1,30 @@
 {
-  "description" : "Mods for Claude Code, published from Sanduhr.",
-  "name" : "sanduhr-mods",
-  "owner" : {
-    "name" : "estevanhernandez-stack-ed"
+  "description": "Mods for Claude Code, published from Sanduhr.",
+  "name": "sanduhr-mods",
+  "owner": {
+    "name": "estevanhernandez-stack-ed"
   },
-  "plugins" : [
+  "plugins": [
     {
-      "description" : "A live now-playing line above the prompt: artist, title and a moving progress bar. On Windows from the media session (YouTube Music in Chrome included); on a Mac from every player through Sanduhr's adapter, or Music and Spotify without it.",
-      "name" : "now-playing",
-      "source" : "./plugins/now-playing",
-      "version" : "0.2.0"
+      "description": "A live now-playing line above the prompt: artist, title and a moving progress bar. On Windows from the media session (YouTube Music in Chrome included); on a Mac from every player through Sanduhr's adapter, or Music and Spotify without it.",
+      "name": "now-playing",
+      "source": "./plugins/now-playing",
+      "version": "0.2.0"
     },
     {
-      "description" : "When a turn creates a tag (git tag, gh release create), a Claude sprite runs across the band above the prompt and crosses a checkered finish line, and the tag's name lands beside it. /finish-line [tag] replays it. Reads nothing, writes nothing, no network.",
-      "name" : "finish-line",
-      "source" : "./plugins/finish-line",
-      "version" : "0.1.0"
+      "description": "When a turn creates a tag (git tag, gh release create), a Claude sprite runs across the band above the prompt and crosses a checkered finish line, and the tag's name lands beside it. /finish-line [tag] replays it. Reads nothing, writes nothing, no network.",
+      "name": "finish-line",
+      "source": "./plugins/finish-line",
+      "version": "0.1.0"
+    },
+    {
+      "author": {
+        "name": "estevanhernandez-stack-ed"
+      },
+      "description": "A band above the prompt showing every message to another agent that is still waiting on a reply.",
+      "name": "agent-comms",
+      "source": "./plugins/agent-comms",
+      "version": "0.2.0"
     }
   ]
 }
