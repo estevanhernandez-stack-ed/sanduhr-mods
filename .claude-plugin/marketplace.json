@@ -34,6 +34,15 @@
       "name": "decision-logger",
       "source": "./plugins/decision-logger",
       "version": "0.1.0"
+    },
+    {
+      "author": {
+        "name": "estevanhernandez-stack-ed"
+      },
+      "description": "/page <project> opens a side pane with that project's 626labs.dev portfolio card: summary, banner and link.",
+      "name": "page-pane",
+      "source": "./plugins/page-pane",
+      "version": "0.1.0"
     }
   ]
 }

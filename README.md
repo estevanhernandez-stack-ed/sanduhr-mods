@@ -37,4 +37,10 @@ claude plugin install <plugin>@sanduhr-mods
   claude plugin install decision-logger --marketplace estevanhernandez-stack-ed/sanduhr-mods
   ```
 
+- **page-pane** 0.1.0: /page <project> opens a side pane with that project's 626labs.dev portfolio card: summary, banner and link.
+
+  ```
+  claude plugin install page-pane --marketplace estevanhernandez-stack-ed/sanduhr-mods
+  ```
+
 <!-- /sanduhr:plugins -->
