@@ -44,3 +44,44 @@ claude plugin install <plugin>@sanduhr-mods
   ```
 
 <!-- /sanduhr:plugins -->
+
+## Mods to build for your own setup
+
+Some mods are tied to one person's machines: a home server, a media box, a dashboard. Those aren't published here as code, because the code would carry someone else's hosts. What travels instead is the idea and a prompt. Paste a prompt into Claude Code (the `plugin-authoring` skill ships with it), fill in the parts in angle brackets, and Claude builds the mod for your setup; Sanduhr's **New Mod** page then keeps it, checks it and turns it on per folder.
+
+### Home lab pulse
+
+A status-line glyph and a toast when something at home goes down or comes back, read from whatever already knows (an Uptime Kuma instance, a Tailscale tailnet, a Home Assistant), polled slowly over SSH or HTTP. `/lab` lists every monitor and peer on demand.
+
+```
+Build me a Claude Code mod called homelab-pulse with the plugin-authoring skill.
+It polls my home lab every 60 seconds and shows a short status-line entry: a
+check mark when everything is up, the count of what is down otherwise, and
+"lab ?" when the source can't be reached. It toasts once when a monitor drops
+and once when it recovers, never on every poll. A /lab command prints every
+monitor and peer with its state.
+Source of truth: <how to read your monitors, e.g. `ssh <host> …` printing JSON,
+an HTTP endpoint, or `tailscale status --json`>. Run it with $.process.run with
+a 20 s timeout, or $.http.fetch; parse only the fields you show.
+Keep all state in an atom; no files, no network beyond that one source; no
+credentials in the mod (use an SSH host alias or a local-network URL).
+Add register.test.ts covering: all up, one down, source unreachable, recovery.
+```
+
+### A quiet pip for a media server
+
+Two characters in the status line while a media server answers, nothing otherwise. No alerts, slow polling, no token.
+
+```
+Build me a Claude Code mod called plex-pip with the plugin-authoring skill.
+Every <5> minutes it fetches <your server's unauthenticated health URL, e.g.
+http://<host>:32400/identity for Plex, or /System/Ping for Jellyfin> with
+$.http.fetch. While the response is ok it shows "🎬🎵" in the status line via
+$.ui.status; on any error or non-2xx it shows nothing. Read the URL and the
+interval from plugin options (plexUrl, pollMinutes) so the mod ships without my
+address in it; do nothing when the URL option is empty. No toasts, no commands,
+no state beyond the last result. Add register.test.ts for ok, non-2xx, a thrown
+fetch and an empty option.
+```
+
+If you build one, publish it to your own marketplace from Sanduhr (New Mod, a kept mod's menu, **Publish to Marketplace…**).
