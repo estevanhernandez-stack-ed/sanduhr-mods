@@ -31,4 +31,10 @@ claude plugin install <plugin>@sanduhr-mods
   claude plugin install agent-comms --marketplace estevanhernandez-stack-ed/sanduhr-mods
   ```
 
+- **decision-logger** 0.1.0: Pushes the dashboard decision log hard: a standing instruction, a nudge after commits and edit-heavy turns, and a running count.
+
+  ```
+  claude plugin install decision-logger --marketplace estevanhernandez-stack-ed/sanduhr-mods
+  ```
+
 <!-- /sanduhr:plugins -->

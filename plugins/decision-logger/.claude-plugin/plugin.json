@@ -1,0 +1,6 @@
+{
+  "name": "decision-logger",
+  "version": "0.1.0",
+  "description": "Pushes the dashboard decision log hard: a standing instruction, a nudge after commits and edit-heavy turns, and a running count.",
+  "types": "./types/index.d.ts"
+}
