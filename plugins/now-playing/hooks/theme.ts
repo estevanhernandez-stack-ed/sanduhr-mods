@@ -152,3 +152,131 @@ export function parseTheme(text: string): Theme | null {
     return null
   }
 }
+
+// ---- The song key and the Sanduhr bridge -------------------------------------------------------
+// One key for a song in every app: the same rule as Sanduhr's Core (`SongKey`). Sanduhr writes its
+// look for the playing song to ~/.sanduhr/now-playing-look.json under this key, and reads the mod's
+// picks back from now-playing-look-offer.json. Pure helpers, no `$`.
+
+const REMASTER_MARK = / - remaster.*$| \(remaster[^)]*\)$/
+
+// Lowercase each scalar on its own (U+0130 stays as written), collapse whitespace, drop one trailing remaster mark.
+export function normalize(s: string): string {
+  const lowered = [...s].map(c => (c === 'İ' ? c : c.toLowerCase())).join('')
+  const collapsed = lowered.replace(/\s+/g, ' ').trim()
+
+  return collapsed.replace(REMASTER_MARK, '').trim()
+}
+
+function utf8(text: string): number[] {
+  const out: number[] = []
+
+  for (const c of text) {
+    const cp = c.codePointAt(0) as number
+
+    if (cp < 0x80) {
+      out.push(cp)
+    } else if (cp < 0x800) {
+      out.push(0xc0 | (cp >> 6), 0x80 | (cp & 0x3f))
+    } else if (cp < 0x10000) {
+      // A lone surrogate becomes U+FFFD, as TextEncoder does.
+      const unit = cp >= 0xd800 && cp <= 0xdfff ? 0xfffd : cp
+      out.push(0xe0 | (unit >> 12), 0x80 | ((unit >> 6) & 0x3f), 0x80 | (unit & 0x3f))
+    } else {
+      out.push(0xf0 | (cp >> 18), 0x80 | ((cp >> 12) & 0x3f), 0x80 | ((cp >> 6) & 0x3f), 0x80 | (cp & 0x3f))
+    }
+  }
+
+  return out
+}
+
+// FNV-1a 64-bit over the UTF-8 bytes of `text`, as 16 lowercase hex digits.
+export function fnv1a64(text: string): string {
+  let h = 0xcbf29ce484222325n
+
+  for (const b of utf8(text)) {
+    h = BigInt.asUintN(64, (h ^ BigInt(b)) * 0x100000001b3n)
+  }
+
+  return h.toString(16).padStart(16, '0')
+}
+
+// The song's key, or null when the title is empty once normalized (the artist may be empty).
+export function songKey(title: string, artist: string): string | null {
+  const t = normalize(title)
+
+  return t === '' ? null : fnv1a64(`${t}\n${normalize(artist)}`)
+}
+
+// Sanduhr draws five letter styles. The mod's other fonts have no counterpart there.
+export type SanduhrStyle = 'plain' | 'bold' | 'italic' | 'bolditalic' | 'smallcaps'
+
+export const SANDUHR_STYLES: readonly SanduhrStyle[] = ['plain', 'bold', 'italic', 'bolditalic', 'smallcaps']
+
+// Sanduhr's style as the mod's font: the five words are the mod's own, same spelling.
+export function fontFromSanduhr(style: string): FontName | null {
+  return (SANDUHR_STYLES as readonly string[]).includes(style) ? (style as FontName) : null
+}
+
+// The mod's font in Sanduhr's vocabulary; sans, mono, double, script and fraktur offer as plain.
+export function sanduhrStyleOf(font: FontName): SanduhrStyle {
+  return (SANDUHR_STYLES as readonly string[]).includes(font) ? (font as SanduhrStyle) : 'plain'
+}
+
+export type SanduhrLook = { key: string; theme: Theme; source: 'saved' | 'seeded' }
+
+const HEX6 = /^#[0-9a-f]{6}$/i
+
+// ~/.sanduhr/now-playing-look.json: `{schema_version:1,key,look:{ink,style,mood},source}`. Null for anything else.
+export function parseSanduhrLook(text: string): SanduhrLook | null {
+  try {
+    const raw = JSON.parse(text) as { schema_version?: unknown; key?: unknown; source?: unknown; look?: { ink?: unknown; style?: unknown; mood?: unknown } }
+    const look = raw.look
+
+    if (raw.schema_version !== 1 || typeof raw.key !== 'string' || !/^[0-9a-f]{16}$/.test(raw.key) || (raw.source !== 'saved' && raw.source !== 'seeded')) {
+      return null
+    }
+
+    if (look === null || typeof look !== 'object' || !Array.isArray(look.ink) || look.ink.length < 1 || look.ink.length > 4) {
+      return null
+    }
+
+    if (!look.ink.every(c => typeof c === 'string' && HEX6.test(c)) || typeof look.style !== 'string') {
+      return null
+    }
+
+    const font = fontFromSanduhr(look.style)
+
+    if (font === null) {
+      return null
+    }
+
+    const mood = typeof look.mood === 'string' ? look.mood.slice(0, 40) : ''
+
+    return { key: raw.key, theme: { font, colors: (look.ink as string[]).map(c => c.toLowerCase()), mood }, source: raw.source }
+  } catch {
+    return null
+  }
+}
+
+// ~/.sanduhr/now-playing-look-offer.json, the mod's pick for a song Sanduhr has no saved look for.
+export function offerJson(key: string, title: string, artist: string, theme: Theme): string {
+  return JSON.stringify({
+    schema_version: 1,
+    key,
+    title,
+    artist,
+    look: { ink: theme.colors.slice(0, 4).map(c => c.toLowerCase()), style: sanduhrStyleOf(theme.font), mood: theme.mood.slice(0, 40) },
+  })
+}
+
+// Where Sanduhr keeps its files for the mod, under the Windows profile folder. Null off Windows.
+export function sanduhrFiles(profile: string | undefined): { dir: string; look: string; offer: string } | null {
+  if (!profile) {
+    return null
+  }
+
+  const dir = `${profile.replace(/[\\/]+$/, '')}\\.sanduhr`
+
+  return { dir, look: `${dir}\\now-playing-look.json`, offer: `${dir}\\now-playing-look-offer.json` }
+}

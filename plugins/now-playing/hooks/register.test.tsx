@@ -1,6 +1,6 @@
 import { expect, mock, test } from 'claude-code/testing'
 
-import { defaultTheme, styleText } from './theme'
+import { defaultTheme, hash, sanduhrFiles, songKey, styleText } from './theme'
 import type { FontName } from './theme'
 
 const BAND = { plugin: 'now-playing', surface: 'terminal', component: 'AbovePrompt', props: { hasSurvey: false, isWorking: false, maxRows: 4 } } as never
@@ -12,20 +12,46 @@ const LRC = '[00:15.66] placeholder one\n[01:00.00] placeholder sung now\n[01:10
 const SONG = 'Alien Ant Farm\u0000Smooth Criminal (Official Music Video)'
 const MODEL_PICK = '{"font":"mono","colors":["#ff2a6d","#05d9e8","#d16ba5"],"mood":"slick"}'
 
-type Opts = { isWindows: boolean; lyricsStatus: number; playerSays: string; modelSays: string | null; files?: string[] }
+type Opts = {
+  isWindows: boolean
+  lyricsStatus: number
+  playerSays: string
+  modelSays: string | null
+  files?: string[]
+  // Sanduhr's side: the profile folder, the folders that exist, the text of files (mutable, so a test can write one mid-song), and a model call counter.
+  profile?: string
+  dirs?: string[]
+  texts?: Record<string, string>
+  modelCalls?: { n: number }
+  // More readings after the first, one every 2s of the mocked clock.
+  later?: string[]
+}
 
 const MAC = '/System/Library/CoreServices/SystemVersion.plist'
 const ADAPTER = '/Applications/Sanduhr.app/Contents/Resources/NowPlaying/mediaremote-adapter.pl'
 
 function beneath(on: any, opts: Opts, argvs: string[][] = [], store: Record<string, unknown> = {}, spawned: string[][] = []) {
   const clock = mock.clock(on, { now: 1000 })
-  mock.store(on, store)
+  // The store is a plain record the test can read back (mock.store only seeds one).
+  on('store.get', (_$: unknown, e: { key: string }) => ({ value: store[e.key] }) as never)
+  on('store.set', (_$: unknown, e: { key: string; value: unknown }) => {
+    store[e.key] = e.value
+
+    return { value: undefined } as never
+  })
   on('session.start', (_$: unknown, e: { cwd: string }) => ({ cwd: e.cwd }))
   on('command.register', () => ({ value: undefined }) as never)
   on('env.get', (_$: unknown, e: { name: string }) => ({
-    value: e.name === 'OS' && opts.isWindows ? 'Windows_NT' : e.name === 'HOME' ? '/Users/someone' : undefined,
+    value: e.name === 'OS' && opts.isWindows ? 'Windows_NT' : e.name === 'HOME' ? '/Users/someone' : e.name === 'USERPROFILE' ? opts.profile : undefined,
   }) as never)
+  on('fs.exists', (_$: unknown, e: { path: string }) => ({ value: (opts.dirs ?? []).includes(e.path) }) as never)
   on('fs.read', (_$: unknown, e: { path: string }) => {
+    const text = opts.texts?.[e.path]
+
+    if (text !== undefined) {
+      return { value: text } as never
+    }
+
     if (!(opts.files ?? []).includes(e.path)) {
       throw new Error(`no ${e.path}`)
     }
@@ -40,15 +66,26 @@ function beneath(on: any, opts: Opts, argvs: string[][] = [], store: Record<stri
   on('http.fetch', () => ({
     value: { status: opts.lyricsStatus, ok: opts.lyricsStatus === 200, headers: {}, text: JSON.stringify({ syncedLyrics: LRC }) },
   }) as never)
-  on('model.complete', () => ({
+  on('model.complete', () => {
+    if (opts.modelCalls !== undefined) {
+      opts.modelCalls.n++
+    }
+
+    return {
     value:
       opts.modelSays === null
         ? { isAnswered: false, reason: 'timeout', usage: {} }
         : { isAnswered: true, text: opts.modelSays, usage: {} },
-  }) as never)
-  on('process.spawn', async function* (_$: unknown, e: { argv: string[] }) {
+    } as never
+  })
+  on('process.spawn', async function* (_$: any, e: { argv: string[] }) {
     spawned.push(e.argv)
     yield { stream: 'stdout', text: LINE }
+
+    for (const more of opts.later ?? []) {
+      await clock.sleep(2000)
+      yield { stream: 'stdout', text: more }
+    }
 
     return { value: { code: 0, signal: null } }
   } as never)
@@ -193,4 +230,93 @@ test('paused: title, artist and lyrics step back; mark, time and controls stay',
   expect(await band.find({ key: 'np-lyric' })).toBeUndefined()
   await expect(band.findAll({ type: 'Text', text: /❚❚/ })).resolves.toHaveLength(1)
   expect((await band.find({ key: 'np-toggle' }))?.props.label).toBe('play')
+})
+
+// Sanduhr bridge: ~/.sanduhr/now-playing-look.json, keyed by the shared song key.
+const PROFILE = 'C:\\Users\\este'
+const SANDUHR = sanduhrFiles(PROFILE) as NonNullable<ReturnType<typeof sanduhrFiles>>
+const LOOK_FILE = SANDUHR.look
+const KEY = songKey('Smooth Criminal (Official Music Video)', 'Alien Ant Farm') as string
+const sanduhrFile = (key: string, style: string, source = 'saved') =>
+  JSON.stringify({ schema_version: 1, key, look: { ink: ['#ff2a6d', '#05d9e8'], style, mood: 'neon' }, source })
+
+test('Sanduhr has a look for the song: it draws, and the model is never asked', async ($, on) => {
+  const modelCalls = { n: 0 }
+  beneath(on, { ...PLAYING, profile: PROFILE, dirs: [SANDUHR.dir], texts: { [LOOK_FILE]: sanduhrFile(KEY, 'italic') }, modelCalls })
+  await $.session.start(START)
+  await settle()
+
+  const band = await $.ui.mount(BAND)
+  await expect(band.findAll({ type: 'Text', text: glyph('italic') })).resolves.toHaveLength(1)
+  expect(modelCalls.n).toBe(0)
+})
+
+test('Sanduhr writes its look a moment late: the wait catches it before any model call', async ($, on) => {
+  const modelCalls = { n: 0 }
+  const texts: Record<string, string> = { [LOOK_FILE]: sanduhrFile('0000000000000000', 'bold') }
+  const clock = beneath(on, { ...PLAYING, profile: PROFILE, dirs: [SANDUHR.dir], texts, modelCalls })
+  await $.session.start(START)
+  await settle()
+
+  // The file still names the previous song, so the default holds and the model waits.
+  expect(modelCalls.n).toBe(0)
+  texts[LOOK_FILE] = sanduhrFile(KEY, 'smallcaps')
+  await clock.advance(2000)
+  await settle()
+
+  const band = await $.ui.mount(BAND)
+  await expect(band.findAll({ type: 'Text', text: glyph('smallcaps') })).resolves.toHaveLength(1)
+  expect(modelCalls.n).toBe(0)
+})
+
+test('Sanduhr installed but with no look for the song: the model picks after the wait', async ($, on) => {
+  const modelCalls = { n: 0 }
+  const clock = beneath(on, { ...PLAYING, profile: PROFILE, dirs: [SANDUHR.dir], modelCalls })
+  await $.session.start(START)
+  await settle()
+  expect(modelCalls.n).toBe(0)
+
+  await clock.advance(2000)
+  await settle()
+
+  expect(modelCalls.n).toBe(1)
+  await expect((await $.ui.mount(BAND)).findAll({ type: 'Text', text: glyph('mono') })).resolves.toHaveLength(1)
+})
+
+test('Sanduhr changes its look mid-song: the band follows on the next reading', async ($, on) => {
+  const texts: Record<string, string> = {}
+  const later = [LINE.replace('63152', '65152')]
+  const clock = beneath(on, { ...PLAYING, profile: PROFILE, dirs: [SANDUHR.dir], texts, later })
+  await $.session.start(START)
+  await settle()
+  await clock.advance(1500)
+  await settle()
+  await expect((await $.ui.mount(BAND)).findAll({ type: 'Text', text: glyph('mono') })).resolves.toHaveLength(1)
+
+  texts[LOOK_FILE] = sanduhrFile(KEY, 'bolditalic')
+  await clock.advance(500)
+  await settle()
+
+  await expect((await $.ui.mount(BAND)).findAll({ type: 'Text', text: glyph('bolditalic') })).resolves.toHaveLength(1)
+})
+
+test('a pick remembered under the old 32-bit key is found and moved to the song key', async ($, on) => {
+  const modelCalls = { n: 0 }
+  const store: Record<string, unknown> = { [`theme:${hash(SONG)}`]: { font: 'script', colors: ['#ff2a6d', '#05d9e8'], mood: 'old' } }
+  beneath(on, { ...PLAYING, modelCalls }, [], store)
+  await $.session.start(START)
+  await settle()
+
+  expect(modelCalls.n).toBe(0)
+  expect(store[`theme:${KEY}`]).toEqual({ font: 'script', colors: ['#ff2a6d', '#05d9e8'], mood: 'old' })
+  await expect((await $.ui.mount(BAND)).findAll({ type: 'Text', text: glyph('script') })).resolves.toHaveLength(1)
+})
+
+test('a model pick is stored under the song key', async ($, on) => {
+  const store: Record<string, unknown> = {}
+  beneath(on, PLAYING, [], store)
+  await $.session.start(START)
+  await settle()
+
+  expect(Object.keys(store)).toEqual([`theme:${KEY}`])
 })

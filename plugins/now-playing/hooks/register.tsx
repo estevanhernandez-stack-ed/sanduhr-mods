@@ -4,7 +4,7 @@ import type { EngineInterface, Register } from 'claude-code'
 import type { NowLyrics, NowTheme, NowTrack } from '../types'
 import { GLOW_FRAME_MS, LYRIC_SHINE_MS, TITLE_SHINE_MS, applyGlow, glowAt, shouldRepaint, sweepAt } from './glow'
 import { currentLine, lyricsUrl, parseLrc, trackKey } from './lyrics'
-import { STYLE_SYSTEM, defaultTheme, gradient, hash, parseTheme, stylePrompt, styleText } from './theme'
+import { STYLE_SYSTEM, defaultTheme, gradient, hash, parseSanduhrLook, parseTheme, sanduhrFiles, songKey, stylePrompt, styleText } from './theme'
 import type { FontName } from './theme'
 import { cleanTitle, clock, livePosition, parseLine } from './track'
 import { WATCHER_ARGV, adapterIn, controlArgv, macControlArgv, macWatcherArgv, parseControl, sanduhrContents } from './watcher'
@@ -22,6 +22,8 @@ const CONTROLS_MS = 8000
 const STYLE_MODEL = 'haiku'
 const TITLE_MAX = 40
 const BAR_WIDTH = 18
+// Sanduhr writes its look for a song a moment after the track changes; give it this long before asking the model.
+const SANDUHR_WAIT_MS = 1500
 // The hover group: pointing anywhere on the now-playing line lights it and reveals the controls.
 const HOVER = 'np-band'
 
@@ -29,6 +31,8 @@ const HOVER = 'np-band'
 // Sanduhr's adapter when installed), or nothing.
 type Player = { watch: readonly string[]; control: (action: Control) => string[] }
 let player: Player | null = null
+// Sanduhr's files for the mod (Windows only; the Mac app does not write them yet). Null elsewhere.
+let sanduhr: ReturnType<typeof sanduhrFiles> = null
 
 let ticker: { cancel: () => void } | null = null
 let lastPaint = 0
@@ -94,16 +98,86 @@ async function fetchLyrics($: EngineInterface, track: NowTrack) {
   await update($, lyrics, () => ({ key, lines: parseLrc(body.syncedLyrics as string) }))
 }
 
-// The look for a song: the default draws at once, a remembered pick replaces it, else the model's.
+// Sanduhr's look for the song, when its file is there and names this song: the one it chose or seeded.
+async function sanduhrLook($: EngineInterface, id: string | null) {
+  if (sanduhr === null || id === null) {
+    return null
+  }
+
+  try {
+    const look = parseSanduhrLook(await $.fs.read(sanduhr.look))
+
+    return look !== null && look.key === id ? look : null
+  } catch {
+    return null
+  }
+}
+
+// Puts Sanduhr's look on the song if it is not there already; the title shines when it changes the look.
+async function applySanduhr($: EngineInterface, key: string, id: string | null): Promise<boolean> {
+  const look = await sanduhrLook($, id)
+  const now = await read($, theme)
+
+  if (look === null || now === null || now.key !== key) {
+    return false
+  }
+
+  const same = now.source === 'sanduhr' && now.font === look.theme.font && now.colors.join() === look.theme.colors.join()
+
+  if (!same) {
+    await update($, theme, t => (t !== null && t.key === key ? { key, ...look.theme, source: 'sanduhr' } : t))
+    await shine($)
+  }
+
+  return true
+}
+
+// The mod's own remembered pick: the song's key first, else the 32-bit entry older versions wrote (moved over once).
+async function remembered($: EngineInterface, key: string, id: string | null) {
+  const legacyKey = `theme:${hash(key)}`
+  const storeKey = id === null ? legacyKey : `theme:${id}`
+  const picked = parseTheme(JSON.stringify((await $.store.get(storeKey)) ?? ''))
+
+  if (picked !== null || storeKey === legacyKey) {
+    return picked
+  }
+
+  const old = parseTheme(JSON.stringify((await $.store.get(legacyKey)) ?? ''))
+
+  if (old !== null) {
+    await $.store.set(storeKey, old)
+  }
+
+  return old
+}
+
+// The look for a song: the default draws at once; Sanduhr's look, if it has one, replaces it with no model call;
+// else a remembered pick; else the model's.
 async function styleSong($: EngineInterface, track: NowTrack) {
   const key = trackKey(track.artist, track.title)
-  const storeKey = `theme:${hash(key)}`
+  const id = songKey(track.title, track.artist)
   await update($, theme, () => ({ key, ...defaultTheme(key), source: 'default' }))
 
-  const remembered = parseTheme(JSON.stringify((await $.store.get(storeKey)) ?? ''))
+  if (await applySanduhr($, key, id)) {
+    return
+  }
 
-  if (remembered !== null) {
-    await update($, theme, () => ({ key, ...remembered, source: 'remembered' }))
+  // Sanduhr installed: its file may lag the track change by a moment, so wait before spending a model call.
+  if (sanduhr !== null && id !== null && (await $.fs.exists(sanduhr.dir).catch(() => false))) {
+    await $.clock.sleep(SANDUHR_WAIT_MS)
+
+    const playing = await read($, current)
+
+    if (playing === null || trackKey(playing.artist, playing.title) !== key || (await applySanduhr($, key, id))) {
+      return
+    }
+  }
+
+  const storeKey = id === null ? `theme:${hash(key)}` : `theme:${id}`
+  const kept = await remembered($, key, id)
+
+  if (kept !== null) {
+    await update($, theme, t => (t !== null && t.key === key && t.source !== 'sanduhr' ? { key, ...kept, source: 'remembered' } : t))
 
     return
   }
@@ -125,8 +199,8 @@ async function styleSong($: EngineInterface, track: NowTrack) {
 
   await $.store.set(storeKey, picked)
 
-  // Only swap if the same song is still on, and shine the title so the change reads as a moment.
-  const swapped = await update($, theme, t => (t !== null && t.key === key ? { key, ...picked, source: 'model' } : t))
+  // Only swap if the same song is still on (and Sanduhr has not set its own look), and shine the title so the change reads as a moment.
+  const swapped = await update($, theme, t => (t !== null && t.key === key && t.source !== 'sanduhr' ? { key, ...picked, source: 'model' } : t))
 
   if (swapped?.source === 'model') {
     await shine($)
@@ -182,6 +256,11 @@ async function watch($: EngineInterface, argv: readonly string[]) {
     for (const line of lines) {
       const track = parseLine(line.trim())
       const key = JSON.stringify(track)
+
+      // Sanduhr may write or change its look at any moment of a song: look again on every reading.
+      if (track !== null) {
+        void applySanduhr($, trackKey(track.artist, track.title), songKey(track.title, track.artist)).catch(() => undefined)
+      }
 
       if (key === last) {
         continue
@@ -254,6 +333,7 @@ export const register: Register = on => {
     })
 
     player = await findPlayer($)
+    sanduhr = (await $.env.get('OS')) === 'Windows_NT' ? sanduhrFiles(await $.env.get('USERPROFILE')) : null
 
     if (player !== null) {
       // A reload or session end tears the loop down mid-read; that is the normal way it stops.
