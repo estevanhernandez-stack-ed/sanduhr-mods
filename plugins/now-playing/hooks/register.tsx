@@ -4,8 +4,8 @@ import type { EngineInterface, Register } from 'claude-code'
 import type { NowLyrics, NowTheme, NowTrack } from '../types'
 import { GLOW_FRAME_MS, LYRIC_SHINE_MS, TITLE_SHINE_MS, applyGlow, glowAt, shouldRepaint, sweepAt } from './glow'
 import { currentLine, lyricsUrl, parseLrc, trackKey } from './lyrics'
-import { STYLE_SYSTEM, defaultTheme, gradient, hash, parseSanduhrLook, parseTheme, sanduhrFiles, songKey, stylePrompt, styleText } from './theme'
-import type { FontName } from './theme'
+import { STYLE_SYSTEM, defaultTheme, gradient, hash, offerJson, parseSanduhrLook, parseTheme, sanduhrFiles, songKey, stylePrompt, styleText } from './theme'
+import type { FontName, Theme } from './theme'
 import { cleanTitle, clock, livePosition, parseLine } from './track'
 import { WATCHER_ARGV, adapterIn, controlArgv, macControlArgv, macWatcherArgv, parseControl, sanduhrContents } from './watcher'
 import type { Adapter, Control } from './watcher'
@@ -33,6 +33,8 @@ type Player = { watch: readonly string[]; control: (action: Control) => string[]
 let player: Player | null = null
 // Sanduhr's files for the mod (Windows only; the Mac app does not write them yet). Null elsewhere.
 let sanduhr: ReturnType<typeof sanduhrFiles> = null
+// The song key last offered to Sanduhr, so one song is offered once however many readings follow.
+let offered: string | null = null
 
 let ticker: { cancel: () => void } | null = null
 let lastPaint = 0
@@ -151,6 +153,21 @@ async function remembered($: EngineInterface, key: string, id: string | null) {
   return old
 }
 
+// Hands the model's pick to Sanduhr as a proposal: only on Windows with Sanduhr's folder there, only when its current
+// look for this song is not one it saved, and once per song. One write of the whole JSON; Sanduhr tolerates a partial file.
+async function offerToSanduhr($: EngineInterface, track: NowTrack, id: string | null, picked: Theme) {
+  if (sanduhr === null || id === null || offered === id || !(await $.fs.exists(sanduhr.dir).catch(() => false))) {
+    return
+  }
+
+  if ((await sanduhrLook($, id))?.source === 'saved') {
+    return
+  }
+
+  offered = id
+  await $.fs.write(sanduhr.offer, offerJson(id, track.title, track.artist, picked))
+}
+
 // The look for a song: the default draws at once; Sanduhr's look, if it has one, replaces it with no model call;
 // else a remembered pick; else the model's.
 async function styleSong($: EngineInterface, track: NowTrack) {
@@ -198,6 +215,7 @@ async function styleSong($: EngineInterface, track: NowTrack) {
   }
 
   await $.store.set(storeKey, picked)
+  await offerToSanduhr($, track, id, picked).catch(() => undefined)
 
   // Only swap if the same song is still on (and Sanduhr has not set its own look), and shine the title so the change reads as a moment.
   const swapped = await update($, theme, t => (t !== null && t.key === key && t.source !== 'sanduhr' ? { key, ...picked, source: 'model' } : t))

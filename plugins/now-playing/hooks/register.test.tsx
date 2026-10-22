@@ -25,6 +25,9 @@ type Opts = {
   modelCalls?: { n: number }
   // More readings after the first, one every 2s of the mocked clock.
   later?: string[]
+  // Every fs.write the mod makes, and a hook that runs as the model answers.
+  writes?: { path: string; text: string }[]
+  onModel?: () => void
 }
 
 const MAC = '/System/Library/CoreServices/SystemVersion.plist'
@@ -44,6 +47,11 @@ function beneath(on: any, opts: Opts, argvs: string[][] = [], store: Record<stri
   on('env.get', (_$: unknown, e: { name: string }) => ({
     value: e.name === 'OS' && opts.isWindows ? 'Windows_NT' : e.name === 'HOME' ? '/Users/someone' : e.name === 'USERPROFILE' ? opts.profile : undefined,
   }) as never)
+  on('fs.write', (_$: unknown, e: { path: string; text: string }) => {
+    opts.writes?.push({ path: e.path, text: e.text })
+
+    return { value: undefined } as never
+  })
   on('fs.exists', (_$: unknown, e: { path: string }) => ({ value: (opts.dirs ?? []).includes(e.path) }) as never)
   on('fs.read', (_$: unknown, e: { path: string }) => {
     const text = opts.texts?.[e.path]
@@ -70,6 +78,8 @@ function beneath(on: any, opts: Opts, argvs: string[][] = [], store: Record<stri
     if (opts.modelCalls !== undefined) {
       opts.modelCalls.n++
     }
+
+    opts.onModel?.()
 
     return {
     value:
@@ -319,4 +329,69 @@ test('a model pick is stored under the song key', async ($, on) => {
   await settle()
 
   expect(Object.keys(store)).toEqual([`theme:${KEY}`])
+})
+
+// The offer: the model's pick handed to Sanduhr, once per song, when Sanduhr is there and has no saved look.
+test('a model pick is offered to Sanduhr once, in its vocabulary', async ($, on) => {
+  const writes: { path: string; text: string }[] = []
+  const later = [LINE.replace('63152', '65152'), LINE.replace('63152', '67152')]
+  const clock = beneath(on, { ...PLAYING, profile: PROFILE, dirs: [SANDUHR.dir], later, writes })
+  await $.session.start(START)
+  await settle()
+  await clock.advance(1500)
+  await settle()
+  await clock.advance(2000)
+  await settle()
+  await clock.advance(2000)
+  await settle()
+
+  expect(writes).toHaveLength(1)
+  expect(writes[0]?.path).toBe(SANDUHR.offer)
+  expect(JSON.parse(writes[0]?.text ?? '')).toEqual({
+    schema_version: 1,
+    key: KEY,
+    title: 'Smooth Criminal (Official Music Video)',
+    artist: 'Alien Ant Farm',
+    look: { ink: ['#ff2a6d', '#05d9e8', '#d16ba5'], style: 'plain', mood: 'slick' },
+  })
+})
+
+test('no offer when Sanduhr holds a saved look for the song', async ($, on) => {
+  const writes: { path: string; text: string }[] = []
+  const texts: Record<string, string> = {}
+  const clock = beneath(on, {
+    ...PLAYING,
+    profile: PROFILE,
+    dirs: [SANDUHR.dir],
+    texts,
+    writes,
+    // Sanduhr saves its own look while the model is still thinking.
+    onModel: () => {
+      texts[LOOK_FILE] = sanduhrFile(KEY, 'bold')
+    },
+  })
+  await $.session.start(START)
+  await settle()
+  await clock.advance(1500)
+  await settle()
+
+  expect(writes).toHaveLength(0)
+})
+
+test('no offer when Sanduhr is not installed (no folder)', async ($, on) => {
+  const writes: { path: string; text: string }[] = []
+  beneath(on, { ...PLAYING, profile: PROFILE, writes })
+  await $.session.start(START)
+  await settle()
+
+  expect(writes).toHaveLength(0)
+})
+
+test('no offer on a Mac', async ($, on) => {
+  const writes: { path: string; text: string }[] = []
+  beneath(on, { ...PLAYING, isWindows: false, profile: PROFILE, dirs: [SANDUHR.dir], files: [MAC], writes })
+  await $.session.start(START)
+  await settle()
+
+  expect(writes).toHaveLength(0)
 })
