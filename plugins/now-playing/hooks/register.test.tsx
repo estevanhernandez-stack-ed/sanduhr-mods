@@ -33,6 +33,14 @@ type Opts = {
 const MAC = '/System/Library/CoreServices/SystemVersion.plist'
 const ADAPTER = '/Applications/Sanduhr.app/Contents/Resources/NowPlaying/mediaremote-adapter.pl'
 
+// The engine resolves a path against the host before the fake filesystem sees it, so on Windows the
+// Mac's /System/... arrives as C:\System\.... Compare paths without the drive and with one separator.
+function samePath(a: string, b: string): boolean {
+  const plain = (p: string) => p.replace(/\\/g, '/').replace(/^[A-Za-z]:(?=\/)/, '')
+
+  return plain(a) === plain(b)
+}
+
 function beneath(on: any, opts: Opts, argvs: string[][] = [], store: Record<string, unknown> = {}, spawned: string[][] = []) {
   const clock = mock.clock(on, { now: 1000 })
   // The store is a plain record the test can read back (mock.store only seeds one).
@@ -52,15 +60,16 @@ function beneath(on: any, opts: Opts, argvs: string[][] = [], store: Record<stri
 
     return { value: undefined } as never
   })
-  on('fs.exists', (_$: unknown, e: { path: string }) => ({ value: (opts.dirs ?? []).includes(e.path) }) as never)
+  on('fs.exists', (_$: unknown, e: { path: string }) => ({ value: (opts.dirs ?? []).some(d => samePath(d, e.path)) }) as never)
   on('fs.read', (_$: unknown, e: { path: string }) => {
-    const text = opts.texts?.[e.path]
+    const textKey = Object.keys(opts.texts ?? {}).find(k => samePath(k, e.path))
+    const text = textKey === undefined ? undefined : opts.texts?.[textKey]
 
     if (text !== undefined) {
       return { value: text } as never
     }
 
-    if (!(opts.files ?? []).includes(e.path)) {
+    if (!(opts.files ?? []).some(f => samePath(f, e.path))) {
       throw new Error(`no ${e.path}`)
     }
 

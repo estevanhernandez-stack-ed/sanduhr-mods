@@ -1,6 +1,9 @@
 {
   "name": "now-playing",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A live now-playing line above the prompt: artist, title and a moving progress bar. On Windows from the media session (YouTube Music in Chrome included); on a Mac from every player through Sanduhr's adapter, or Music and Spotify without it.",
+  "author": {
+    "name": "estevanhernandez-stack-ed"
+  },
   "types": "./types/index.d.ts"
 }

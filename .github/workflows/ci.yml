@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The Claude Code CLI that runs `plugin validate` and `plugin test`. Pinned so a new validator
+  # warning can't turn main red overnight; raise it in its own PR after running the checks locally.
+  CLAUDE_CODE_VERSION: 2.1.307
+
+jobs:
+  plugins:
+    name: validate and test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install the Claude Code CLI
+        run: |
+          npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+          claude --version
+          # Fail here, not later, if this CLI has no plugin validate/test.
+          claude plugin validate --help > /dev/null
+          claude plugin test --help > /dev/null
+
+      - name: Repository checks (tools/check.py)
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            python -I tools/check.py --base "origin/${BASE_REF}"
+          else
+            python -I tools/check.py
+          fi
+
+      - name: Validate the marketplace
+        run: claude plugin validate --strict .
+
+      - name: Validate each plugin (--strict)
+        run: |
+          status=0
+          for dir in plugins/*/; do
+            dir="${dir%/}"
+            echo "::group::${dir}"
+            claude plugin validate --strict "$dir" || { status=1; echo "::error::${dir}: claude plugin validate --strict failed"; }
+            echo "::endgroup::"
+          done
+          exit $status
+
+      - name: Test each plugin that has tests
+        run: |
+          status=0
+          for dir in plugins/*/; do
+            dir="${dir%/}"
+            if [ -z "$(find "$dir" -name '*.test.ts' -o -name '*.test.tsx' | head -1)" ]; then
+              echo "${dir}: no tests"
+              continue
+            fi
+            echo "::group::${dir}"
+            claude plugin test "$dir" < /dev/null || { status=1; echo "::error::${dir}: claude plugin test failed"; }
+            echo "::endgroup::"
+          done
+          exit $status
