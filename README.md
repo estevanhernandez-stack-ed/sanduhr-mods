@@ -43,6 +43,14 @@ claude plugin install <plugin>@sanduhr-mods
   claude plugin install page-pane --marketplace estevanhernandez-stack-ed/sanduhr-mods
   ```
 
+- **desk-setup** 0.1.0: A Claude Code skill that sets up your Sanduhr Desk as a conversation: it reads the screen and wallpaper, asks a few short questions, proposes a small look you Apply on the live preview, then offers a finishing widget such as a pixel companion or song looks. Windows, Sanduhr 3.7 or later; widgets need 3.8.
+
+  ```
+  claude plugin install desk-setup --marketplace estevanhernandez-stack-ed/sanduhr-mods
+  ```
+
+  Then ask Claude Code to set up your Desk ("set up my Desk on the second screen"). Every change previews on the desktop and waits for your Apply.
+
 <!-- /sanduhr:plugins -->
 
 ## Mods to build for your own setup
