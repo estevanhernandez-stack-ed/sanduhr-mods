@@ -42,8 +42,7 @@
       "description": "/page <project> opens a side pane with that project's 626labs.dev portfolio card: summary, banner and link.",
       "name": "page-pane",
       "source": "./plugins/page-pane",
-<<<<<<< HEAD
-      "version": "0.1.0"
+      "version": "0.1.1"
     },
     {
       "author": {
@@ -53,9 +52,6 @@
       "name": "desk-setup",
       "source": "./plugins/desk-setup",
       "version": "0.1.0"
-=======
-      "version": "0.1.1"
->>>>>>> origin/main
     }
   ]
 }
