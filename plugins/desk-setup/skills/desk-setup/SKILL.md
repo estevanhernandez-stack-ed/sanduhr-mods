@@ -109,9 +109,13 @@ Field notes:
 - **launcher**: up to 8 buttons, `{kind: app, target: <id from start_menu_apps>, label, glow}` or
   `{kind: link, target: https://..., label}`. No command lines. Pick the apps they named or the obvious
   ones they use; never guess an id.
-- **Meter styles**: if `get_desk` lists a style for the usage meters (slim, ring or ticks), offer the one
-  that fits the look: slim for minimal, ring for a corner badge, ticks for a Rainmeter feel. If it lists
-  none, this build doesn't have them yet; don't send the field.
+- **style (meter styles)**: `layout.<piece>.style` is one of `bar`, `slim` (4 px bars), `ring` or
+  `ticks`, for the pieces that draw bars (such as `meters`, `claude`, `telemetry`; trust what `get_desk`
+  says over this list). It lands in 3.8, so check
+  first: send `style` only when `get_desk` shows it (a style in `design.layout`, or styles in `limits`).
+  When it doesn't, leave the field out, propose the rest, and tell the user in one line that slim bars
+  arrive with a Sanduhr update. Slim suits minimal and Rainmeter-style looks, ring a corner badge, ticks
+  a gauge feel. If a proposal with `style` comes back `rejected` on that field, drop it and send again.
 
 ### Checking 3:1 before you send
 
@@ -161,6 +165,30 @@ Once the look is applied, offer one thing that would finish it, the one that fit
 
 Offer one, maybe two. Don't run the list.
 
+## Coming from Rainmeter
+
+When the user mentions Rainmeter (or a suite by name), offer to carry over **the look**, not the skin:
+
+- Ask them to describe it or share a screenshot: fonts, colors, the slant, what sits where. Reading a
+  screenshot they paste is fine; reading their skin folder is not needed and not offered.
+- Translate the look into Sanduhr's own pieces: the palette into `propose_theme` (and the Desk ink),
+  the slant into a fold of two stacks (one tilt per stack, so a fold is a left stack at about -17 and a
+  right one at about +17), bars into `slim` meters when the build has styles, a logo button into a
+  Launcher button, a weather or now-playing skin into the `weather` and `nowPlaying` pieces.
+- Say what doesn't carry: audio visualisers (the Desk draws no system audio), per-letter gradients
+  and inline shadows (the Desk inks a whole piece), glowing lines and shapes, GPU and process readouts.
+  One line, then move on.
+- **Never parse or run skin code**: no `.ini` measures, plugins, Lua or bangs, and no skin's program
+  paths as Launcher targets. Launcher targets come from `start_menu_apps` or https links only.
+- **Fonts and art only when they are the user's.** Their own hand-drawn font, installed, is fine to
+  name in `font`. Someone else's skin art or fonts aren't yours or theirs to import: suggest an
+  installed font that's close. A logo image goes on a Launcher button only through the Launcher's own
+  image picker, by the user.
+- Coordinates, monitor positions, latitude and longitude in a skin are the home's numbers, not the
+  look. Don't carry them; place by anchor and pick the weather place in Sanduhr.
+
+See [references/example-knighthawk-fold.md](references/example-knighthawk-fold.md).
+
 ## OLED screens
 
 When the user says yes to OLED (or the screen is black and they haven't said no), say this once, short:
@@ -192,5 +220,7 @@ setting in the first proposal's notes only.
   second screen, OLED, with a companion.
 - [references/example-minimal-launcher.md](references/example-minimal-launcher.md): a minimal clock and
   Launcher on a busy photo wallpaper.
-- [references/example-rainmeter-fold.md](references/example-rainmeter-fold.md): a Rainmeter-style fold
-  with weather nickname and song looks.
+- [references/example-knighthawk-fold.md](references/example-knighthawk-fold.md): a Rainmeter-style
+  fold, like a Knighthawk suite, on a black second screen: slim meters, a launcher for the logo.
+- [references/example-sunset-fold.md](references/example-sunset-fold.md): a fold on a dark wallpaper
+  with a weather nickname and song looks.

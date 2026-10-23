@@ -1,4 +1,4 @@
-# Example: a Rainmeter-style fold, with a weather nickname and song looks
+# Example: a sunset fold, with a weather nickname and song looks
 
 Made-up data throughout. Shows tilt for a fold, a weather nickname, a gradient picked with margin, and
 song looks as the finish.
