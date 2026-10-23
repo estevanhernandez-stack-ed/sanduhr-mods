@@ -9,13 +9,13 @@
       "description": "A live now-playing line above the prompt: artist, title and a moving progress bar. On Windows from the media session (YouTube Music in Chrome included); on a Mac from every player through Sanduhr's adapter, or Music and Spotify without it.",
       "name": "now-playing",
       "source": "./plugins/now-playing",
-      "version": "0.3.0"
+      "version": "0.3.1"
     },
     {
       "description": "When a turn creates a tag (git tag, gh release create), a Claude sprite runs across the band above the prompt and crosses a checkered finish line, and the tag's name lands beside it. /finish-line [tag] replays it. Reads nothing, writes nothing, no network.",
       "name": "finish-line",
       "source": "./plugins/finish-line",
-      "version": "0.1.0"
+      "version": "0.1.1"
     },
     {
       "author": {
@@ -24,7 +24,7 @@
       "description": "A band above the prompt showing every message to another agent that is still waiting on a reply.",
       "name": "agent-comms",
       "source": "./plugins/agent-comms",
-      "version": "0.2.0"
+      "version": "0.2.1"
     },
     {
       "author": {
@@ -33,7 +33,7 @@
       "description": "Pushes the dashboard decision log hard: a standing instruction, a nudge after commits and edit-heavy turns, and a running count.",
       "name": "decision-logger",
       "source": "./plugins/decision-logger",
-      "version": "0.1.0"
+      "version": "0.1.1"
     },
     {
       "author": {
@@ -42,6 +42,7 @@
       "description": "/page <project> opens a side pane with that project's 626labs.dev portfolio card: summary, banner and link.",
       "name": "page-pane",
       "source": "./plugins/page-pane",
+<<<<<<< HEAD
       "version": "0.1.0"
     },
     {
@@ -52,6 +53,9 @@
       "name": "desk-setup",
       "source": "./plugins/desk-setup",
       "version": "0.1.0"
+=======
+      "version": "0.1.1"
+>>>>>>> origin/main
     }
   ]
 }

@@ -10,7 +10,7 @@ test('a delivered SendMessage shows a waiting band until a peer replies', async 
 
     return <Box />
   })
-  on('ui.toast', () => ({}) as never)
+  on('ui.toast', () => ({ value: undefined }) as never)
   on('session.send', () => ({ isDelivered: true }))
   on('session.receive', () => ({ consumed: 'no' }) as never)
 

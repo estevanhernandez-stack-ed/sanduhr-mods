@@ -1,6 +1,9 @@
 {
   "name": "page-pane",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "/page <project> opens a side pane with that project's 626labs.dev portfolio card: summary, banner and link.",
+  "author": {
+    "name": "estevanhernandez-stack-ed"
+  },
   "types": "./types/index.d.ts"
 }

@@ -11,7 +11,9 @@ function stage(on: any, world: World) {
   on('session.start', (_$: unknown, e: { cwd: string }) => ({ cwd: e.cwd }))
   on('command.register', () => ({ value: undefined }) as never)
   on('ui.open', () => ({ value: undefined }) as never)
-  on('env.get', (_$: unknown, e: { name: string }) => ({ value: e.name === 'TEMP' ? 'C:\\tmp' : undefined }) as never)
+  // A rooted temp folder with no drive letter is absolute on Windows and macOS alike, so the Pane
+  // accepts the banner path on either host (C:\tmp is relative on a Mac).
+  on('env.get', (_$: unknown, e: { name: string }) => ({ value: e.name === 'TMPDIR' ? '/tmp' : undefined }) as never)
   on('http.fetch', (_$: unknown, e: { url: string }) => {
     const isVersions = e.url.endsWith('plugin-versions.json')
     const status = isVersions ? 200 : world.feed

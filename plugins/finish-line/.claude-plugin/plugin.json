@@ -1,7 +1,10 @@
 {
   "name": "finish-line",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "When a turn creates a tag (git tag, gh release create), a Claude sprite runs across the band above the prompt and crosses a checkered finish line, and the tag's name lands beside it. /finish-line [tag] replays it. Reads nothing, writes nothing, no network.",
+  "author": {
+    "name": "estevanhernandez-stack-ed"
+  },
   "types": "./types/index.d.ts",
   "userConfig": {
     "motion": {
