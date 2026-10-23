@@ -33,12 +33,15 @@ type Opts = {
 const MAC = '/System/Library/CoreServices/SystemVersion.plist'
 const ADAPTER = '/Applications/Sanduhr.app/Contents/Resources/NowPlaying/mediaremote-adapter.pl'
 
-// The engine resolves a path against the host before the fake filesystem sees it, so on Windows the
-// Mac's /System/... arrives as C:\System\.... Compare paths without the drive and with one separator.
-function samePath(a: string, b: string): boolean {
-  const plain = (p: string) => p.replace(/\\/g, '/').replace(/^[A-Za-z]:(?=\/)/, '')
+// The engine resolves a path against the host before the fake filesystem sees it: on Windows the
+// Mac's /System/... arrives as C:\System\..., and on a Mac the Windows profile C:\Users\... arrives
+// as <cwd>/C:\Users\.... Compare with one separator, dropping the drive and anything before it.
+function plainPath(p: string): string {
+  return p.replace(/\\/g, '/').replace(/^.*?[A-Za-z]:(?=\/)/, '')
+}
 
-  return plain(a) === plain(b)
+function samePath(a: string, b: string): boolean {
+  return plainPath(a) === plainPath(b)
 }
 
 function beneath(on: any, opts: Opts, argvs: string[][] = [], store: Record<string, unknown> = {}, spawned: string[][] = []) {
@@ -355,7 +358,7 @@ test('a model pick is offered to Sanduhr once, in its vocabulary', async ($, on)
   await settle()
 
   expect(writes).toHaveLength(1)
-  expect(writes[0]?.path).toBe(SANDUHR.offer)
+  expect(plainPath(writes[0]?.path ?? '')).toBe(plainPath(SANDUHR.offer))
   expect(JSON.parse(writes[0]?.text ?? '')).toEqual({
     schema_version: 1,
     key: KEY,
