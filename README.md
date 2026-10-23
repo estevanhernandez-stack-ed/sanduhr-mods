@@ -13,31 +13,31 @@ claude plugin install <plugin>@sanduhr-mods
 
 <!-- sanduhr:plugins -->
 
-- **now-playing** 0.2.0: A live now-playing line above the prompt: artist, title and a moving progress bar. On Windows from the media session (YouTube Music in Chrome included); on a Mac from every player through Sanduhr's adapter, or Music and Spotify without it.
+- **now-playing** 0.3.1: A live now-playing line above the prompt: artist, title and a moving progress bar. On Windows from the media session (YouTube Music in Chrome included); on a Mac from every player through Sanduhr's adapter, or Music and Spotify without it.
 
   ```
   claude plugin install now-playing --marketplace estevanhernandez-stack-ed/sanduhr-mods
   ```
 
-- **finish-line** 0.1.0: When a turn creates a tag (git tag, gh release create), a Claude sprite runs across the band above the prompt and crosses a checkered finish line, and the tag's name lands beside it. /finish-line [tag] replays it. Reads nothing, writes nothing, no network.
+- **finish-line** 0.1.1: When a turn creates a tag (git tag, gh release create), a Claude sprite runs across the band above the prompt and crosses a checkered finish line, and the tag's name lands beside it. /finish-line [tag] replays it. Reads nothing, writes nothing, no network.
 
   ```
   claude plugin install finish-line --marketplace estevanhernandez-stack-ed/sanduhr-mods
   ```
 
-- **agent-comms** 0.2.0: A band above the prompt showing every message to another agent that is still waiting on a reply.
+- **agent-comms** 0.2.1: A band above the prompt showing every message to another agent that is still waiting on a reply.
 
   ```
   claude plugin install agent-comms --marketplace estevanhernandez-stack-ed/sanduhr-mods
   ```
 
-- **decision-logger** 0.1.0: Pushes the dashboard decision log hard: a standing instruction, a nudge after commits and edit-heavy turns, and a running count.
+- **decision-logger** 0.1.1: Pushes the dashboard decision log hard: a standing instruction, a nudge after commits and edit-heavy turns, and a running count.
 
   ```
   claude plugin install decision-logger --marketplace estevanhernandez-stack-ed/sanduhr-mods
   ```
 
-- **page-pane** 0.1.0: /page <project> opens a side pane with that project's 626labs.dev portfolio card: summary, banner and link.
+- **page-pane** 0.1.1: /page <project> opens a side pane with that project's 626labs.dev portfolio card: summary, banner and link.
 
   ```
   claude plugin install page-pane --marketplace estevanhernandez-stack-ed/sanduhr-mods

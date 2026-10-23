@@ -1,7 +1,10 @@
 {
   "name": "agent-comms",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A band above the prompt showing every message to another agent that is still waiting on a reply.",
+  "author": {
+    "name": "estevanhernandez-stack-ed"
+  },
   "types": "./types/index.d.ts",
   "userConfig": {
     "agentTools": {

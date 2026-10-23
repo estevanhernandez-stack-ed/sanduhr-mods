@@ -33,6 +33,17 @@ type Opts = {
 const MAC = '/System/Library/CoreServices/SystemVersion.plist'
 const ADAPTER = '/Applications/Sanduhr.app/Contents/Resources/NowPlaying/mediaremote-adapter.pl'
 
+// The engine resolves a path against the host before the fake filesystem sees it: on Windows the
+// Mac's /System/... arrives as C:\System\..., and on a Mac the Windows profile C:\Users\... arrives
+// as <cwd>/C:\Users\.... Compare with one separator, dropping the drive and anything before it.
+function plainPath(p: string): string {
+  return p.replace(/\\/g, '/').replace(/^.*?[A-Za-z]:(?=\/)/, '')
+}
+
+function samePath(a: string, b: string): boolean {
+  return plainPath(a) === plainPath(b)
+}
+
 function beneath(on: any, opts: Opts, argvs: string[][] = [], store: Record<string, unknown> = {}, spawned: string[][] = []) {
   const clock = mock.clock(on, { now: 1000 })
   // The store is a plain record the test can read back (mock.store only seeds one).
@@ -52,15 +63,16 @@ function beneath(on: any, opts: Opts, argvs: string[][] = [], store: Record<stri
 
     return { value: undefined } as never
   })
-  on('fs.exists', (_$: unknown, e: { path: string }) => ({ value: (opts.dirs ?? []).includes(e.path) }) as never)
+  on('fs.exists', (_$: unknown, e: { path: string }) => ({ value: (opts.dirs ?? []).some(d => samePath(d, e.path)) }) as never)
   on('fs.read', (_$: unknown, e: { path: string }) => {
-    const text = opts.texts?.[e.path]
+    const textKey = Object.keys(opts.texts ?? {}).find(k => samePath(k, e.path))
+    const text = textKey === undefined ? undefined : opts.texts?.[textKey]
 
     if (text !== undefined) {
       return { value: text } as never
     }
 
-    if (!(opts.files ?? []).includes(e.path)) {
+    if (!(opts.files ?? []).some(f => samePath(f, e.path))) {
       throw new Error(`no ${e.path}`)
     }
 
@@ -346,7 +358,7 @@ test('a model pick is offered to Sanduhr once, in its vocabulary', async ($, on)
   await settle()
 
   expect(writes).toHaveLength(1)
-  expect(writes[0]?.path).toBe(SANDUHR.offer)
+  expect(plainPath(writes[0]?.path ?? '')).toBe(plainPath(SANDUHR.offer))
   expect(JSON.parse(writes[0]?.text ?? '')).toEqual({
     schema_version: 1,
     key: KEY,
