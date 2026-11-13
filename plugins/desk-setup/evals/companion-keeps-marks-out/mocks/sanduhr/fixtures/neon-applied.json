@@ -1,0 +1,294 @@
+{
+ "status": "ok",
+ "writer_version": "4.8.0",
+ "design": {
+  "layout": {
+   "clock": {
+    "anchor": "ml",
+    "size": 1.3,
+    "monitor": "\\\\?\\DISPLAY#FXB0002#4&0f1x2d&0&UID1002#{fixture-0000-side}"
+   },
+   "claude": {
+    "hidden": true
+   },
+   "meters": {
+    "anchor": "ml",
+    "size": 1.0,
+    "monitor": "\\\\?\\DISPLAY#FXB0002#4&0f1x2d&0&UID1002#{fixture-0000-side}",
+    "style": "ticks"
+   },
+   "nowPlaying": {
+    "anchor": "ml",
+    "size": 1.0,
+    "monitor": "\\\\?\\DISPLAY#FXB0002#4&0f1x2d&0&UID1002#{fixture-0000-side}"
+   },
+   "message": {
+    "hidden": true
+   },
+   "telemetry": {
+    "hidden": true
+   },
+   "weather": {
+    "hidden": true
+   },
+   "watchers": {
+    "hidden": true
+   },
+   "launcher": {
+    "hidden": true
+   },
+   "meetings": {
+    "hidden": true
+   },
+   "glow": {
+    "hidden": true
+   },
+   "companion": {
+    "hidden": true
+   }
+  },
+  "font": "JetBrains Mono",
+  "ink": [
+   "#22d3ee",
+   "#a855f7",
+   "#ec4899"
+  ],
+  "plate": false,
+  "shadow": false,
+  "launcher": {
+   "orientation": "row",
+   "buttons": []
+  },
+  "name": "Neon column"
+ },
+ "pieces": [
+  "message",
+  "clock",
+  "claude",
+  "meters",
+  "nowPlaying",
+  "telemetry",
+  "weather",
+  "watchers",
+  "launcher",
+  "meetings",
+  "glow",
+  "companion"
+ ],
+ "anchors": [
+  "tl",
+  "tc",
+  "tr",
+  "ml",
+  "mr",
+  "bl",
+  "bc",
+  "br"
+ ],
+ "fonts": {
+  "installed": [
+   "Segoe UI",
+   "Consolas",
+   "JetBrains Mono",
+   "Bahnschrift",
+   "Caveat"
+  ],
+  "bundled": [
+   "EsteFont Pro",
+   "EsteFont 26"
+  ]
+ },
+ "monitors": [
+  {
+   "id": "\\\\?\\DISPLAY#FXA0001#4&0f1x2d&0&UID1001#{fixture-0000-main}",
+   "name": "2560×1440, main",
+   "width": 2560,
+   "height": 1440,
+   "primary": true,
+   "left": 0,
+   "top": 0
+  },
+  {
+   "id": "\\\\?\\DISPLAY#FXB0002#4&0f1x2d&0&UID1002#{fixture-0000-side}",
+   "name": "1920×1080, right of main",
+   "width": 1920,
+   "height": 1080,
+   "primary": false,
+   "left": 2560,
+   "top": 0
+  }
+ ],
+ "wallpaper": {
+  "summary": {
+   "brightness": 0.31,
+   "dominant": [
+    {
+     "hex": "#7a8ca0",
+     "share": 0.34
+    },
+    {
+     "hex": "#d9c7a4",
+     "share": 0.22
+    }
+   ],
+   "monitors": [
+    {
+     "index": 0,
+     "primary": true,
+     "width": 2560,
+     "height": 1440,
+     "brightness": 0.42,
+     "dominant": [
+      {
+       "hex": "#7a8ca0",
+       "share": 0.41
+      },
+      {
+       "hex": "#d9c7a4",
+       "share": 0.27
+      }
+     ],
+     "anchors": {
+      "tl": {
+       "brightness": 0.38,
+       "busyness": 0.62
+      },
+      "tc": {
+       "brightness": 0.55,
+       "busyness": 0.48
+      },
+      "tr": {
+       "brightness": 0.61,
+       "busyness": 0.55
+      },
+      "ml": {
+       "brightness": 0.33,
+       "busyness": 0.66
+      },
+      "mr": {
+       "brightness": 0.47,
+       "busyness": 0.58
+      },
+      "bl": {
+       "brightness": 0.29,
+       "busyness": 0.71
+      },
+      "bc": {
+       "brightness": 0.36,
+       "busyness": 0.52
+      },
+      "br": {
+       "brightness": 0.41,
+       "busyness": 0.6
+      }
+     }
+    },
+    {
+     "index": 1,
+     "primary": false,
+     "width": 1920,
+     "height": 1080,
+     "brightness": 0.01,
+     "dominant": [
+      {
+       "hex": "#050505",
+       "share": 0.97
+      }
+     ],
+     "anchors": {
+      "tl": {
+       "brightness": 0.01,
+       "busyness": 0.0
+      },
+      "tc": {
+       "brightness": 0.01,
+       "busyness": 0.0
+      },
+      "tr": {
+       "brightness": 0.01,
+       "busyness": 0.0
+      },
+      "ml": {
+       "brightness": 0.01,
+       "busyness": 0.0
+      },
+      "mr": {
+       "brightness": 0.01,
+       "busyness": 0.0
+      },
+      "bl": {
+       "brightness": 0.01,
+       "busyness": 0.0
+      },
+      "bc": {
+       "brightness": 0.01,
+       "busyness": 0.0
+      },
+      "br": {
+       "brightness": 0.01,
+       "busyness": 0.0
+      }
+     }
+    }
+   ]
+  }
+ },
+ "designs": [
+  {
+   "name": "Neon column",
+   "applied": true
+  }
+ ],
+ "direct": false,
+ "limits": {
+  "contrast_min": 3.0,
+  "name_chars": 40,
+  "note_chars": 200,
+  "piece_size": {
+   "min": 0.6,
+   "max": 1.6
+  },
+  "piece_tilt": {
+   "min": -20,
+   "max": 20
+  },
+  "piece_style": {
+   "pieces": [
+    "claude",
+    "meters",
+    "telemetry"
+   ],
+   "values": [
+    "bar",
+    "slim",
+    "ring",
+    "ticks"
+   ],
+   "default": "bar"
+  },
+  "weather_nickname_chars": 24,
+  "launcher_buttons": 8,
+  "launcher_label_chars": 24,
+  "message_lines": 30,
+  "message_line_chars": 80
+ },
+ "start_menu_apps": [
+  {
+   "id": "fixture.Spotify!App",
+   "name": "Spotify"
+  },
+  {
+   "id": "fixture.Steam!App",
+   "name": "Steam"
+  },
+  {
+   "id": "fixture.WindowsTerminal!App",
+   "name": "Terminal"
+  },
+  {
+   "id": "fixture.Firefox!App",
+   "name": "Firefox"
+  }
+ ],
+ "state_age_seconds": 4
+}

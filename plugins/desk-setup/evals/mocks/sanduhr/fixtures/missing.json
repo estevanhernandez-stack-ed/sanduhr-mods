@@ -1,0 +1,5 @@
+{
+ "status": "no_data",
+ "reason": "missing",
+ "remedy": "Sanduhr has not written the Desk state yet. Start the Sanduhr widget with its Claude Code integration installed (Settings, Claude Code); the state appears within a few seconds. Then call get_desk again."
+}
