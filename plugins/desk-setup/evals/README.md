@@ -5,6 +5,10 @@ one rule the skill states: read the Desk first, ask before designing, check 3:1 
 Anthropic marks in a pack, Launcher targets only from `start_menu_apps`, `style` only on a build that has it, and stopping
 when Sanduhr isn't running.
 
+Every case also runs `prose-guard`, a free regex grader on the final reply: the standard and conclusion patterns of
+`/vibe-thesis:guard` (inflationary words, self-praise framings) plus the banned corporate phrases from the 626 voice rules.
+Keep it in step with those two lists when they change.
+
 ```
 claude plugin eval plugins/desk-setup --trust-plugin --no-publish -j 8 --max-cost-usd 15
 ```
