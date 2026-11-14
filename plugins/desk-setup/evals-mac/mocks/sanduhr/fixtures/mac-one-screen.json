@@ -1,0 +1,116 @@
+{
+ "status": "ok",
+ "design": {
+  "layout": {
+   "clock": {
+    "anchor": "bl",
+    "size": 1,
+    "hidden": false,
+    "tilt": 0
+   },
+   "claude": {
+    "anchor": "bl",
+    "size": 1,
+    "hidden": false,
+    "tilt": 0,
+    "style": "bar"
+   },
+   "nowPlaying": {
+    "anchor": "bc",
+    "size": 1,
+    "hidden": false,
+    "tilt": 0
+   },
+   "message": {
+    "hidden": true
+   },
+   "meters": {
+    "hidden": true
+   },
+   "telemetry": {
+    "hidden": true
+   },
+   "weather": {
+    "hidden": true
+   },
+   "watchers": {
+    "hidden": true
+   },
+   "meetings": {
+    "hidden": true
+   },
+   "companion": {
+    "hidden": true
+   }
+  },
+  "font": "EsteFont Pro",
+  "ink": "#ffffff",
+  "plate": false,
+  "shadow": true
+ },
+ "pieces": [
+  "message",
+  "clock",
+  "claude",
+  "meters",
+  "nowPlaying",
+  "telemetry",
+  "weather",
+  "watchers",
+  "meetings",
+  "companion"
+ ],
+ "anchors": [
+  "tl",
+  "tc",
+  "tr",
+  "ml",
+  "mr",
+  "bl",
+  "bc",
+  "br"
+ ],
+ "fonts": {
+  "desk": "EsteFont Pro",
+  "message": "",
+  "installed": [
+   "Helvetica Neue",
+   "Avenir Next",
+   "Menlo",
+   "SF Mono"
+  ],
+  "bundled": [
+   "EsteFont Pro",
+   "EsteFont 26"
+  ]
+ },
+ "shown": [
+  "clock",
+  "claude",
+  "nowPlaying"
+ ],
+ "message_color": "9ad7ff",
+ "notch_text_color": "ffffff",
+ "limits": {
+  "piece_tilt": {
+   "min": -20,
+   "max": 20
+  },
+  "piece_style": {
+   "pieces": [
+    "claude",
+    "meters",
+    "telemetry"
+   ],
+   "values": [
+    "bar",
+    "slim",
+    "ring",
+    "ticks"
+   ],
+   "default": "bar"
+  }
+ },
+ "sprites": [],
+ "writer_version": "2.43.2"
+}
