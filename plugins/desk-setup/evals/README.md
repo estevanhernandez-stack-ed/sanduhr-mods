@@ -26,3 +26,18 @@ The default runs each case 3 times with the plugin and 3 without it, and reports
 
 A case is a single prompt: `claude plugin eval` doesn't script follow-up replies, so the multi-round parts of the skill
 (iterate on the preview, Apply, then the finish) are each tested from a prompt that states where the conversation stands.
+
+## The Mac suite
+
+`../evals-mac/` holds the Mac Desk cases, run with their own mocks because the Mac server's tool descriptions differ:
+
+```
+claude plugin eval plugins/desk-setup --eval-dir evals-mac --trust-plugin --no-publish -j 6 --max-cost-usd 8
+```
+
+- `evals-mac/mocks/sanduhr/_tools.json` is the Mac Sanduhr MCP server's `tools/list` (2.43.2), the same seven Desk tools.
+- `fixtures/mac-one-screen.json` is a made-up `desk-state.json` passed through the Mac server's own `get_desk`: no
+  `monitors`, `wallpaper`, `start_menu_apps`, `designs` or `direct`, which is how the skill tells the Mac Desk apart.
+- The cases check the Mac branch of the skill: ask about the wallpaper instead of which screen, send no `monitor`,
+  `launcher`, `glow` or ink word, and put a message line through `propose_desk_messages`.
+

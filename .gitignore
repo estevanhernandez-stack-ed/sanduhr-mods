@@ -1,3 +1,5 @@
 # claude plugin eval output
 plugins/*/evals/results/
 plugins/*/evals/**/mocks/.replay/
+plugins/*/evals-mac/results/
+plugins/*/evals-mac/**/mocks/.replay/

@@ -1,6 +1,6 @@
 ---
 name: desk-setup
-description: Set up a person's Sanduhr Desk with them as a short conversation, from reading the screen to a finishing widget. Use when the user asks to set up, design, redo or tidy their Desk or desktop, wants Sanduhr widgets on a screen, mentions moving off Rainmeter, asks for a desk pet, companion or sprite to match their setup, or says something like "make my second monitor look good". Needs the Sanduhr MCP tools (get_desk, propose_desk); without them, say what is missing and stop.
+description: Set up a person's Sanduhr Desk with them as a short conversation, from reading the screen to a finishing widget. Use when the user asks to set up, design, redo or tidy their Desk or desktop, wants Sanduhr widgets on a screen, mentions moving off Rainmeter, asks for a desk pet, companion or sprite to match their setup, or says something like "make my second monitor look good". Works with Sanduhr for Windows and for Mac. Needs the Sanduhr MCP tools (get_desk, propose_desk); without them, say what is missing and stop.
 ---
 
 # Desk setup
@@ -14,11 +14,14 @@ finishes it. The user presses Apply on every change. Your job is good proposals 
 - **Find the tools.** This skill drives the Sanduhr MCP server (`mcp__sanduhr__*`): `get_desk`,
   `propose_desk`, and for the finish `propose_widget`, `propose_now_playing_looks`, `propose_theme`,
   `propose_desk_messages`. If `get_desk` is missing, tell the user the Desk tools come with Sanduhr for
-  Windows 3.7 or later (with its Claude Code integration installed) and stop. If `propose_widget` is
-  missing, skip the widget step; it arrived in 3.8.
+  Windows 3.7 or later, or Sanduhr for Mac 2.37 or later, with its Claude Code integration installed,
+  and stop. If `propose_widget` is missing, skip the widget step; it arrived in Windows 3.8.
 - **Call `get_desk` first, every session.** Design from what it returns, never from memory. If it
   answers `no_data` with reason `missing`, Sanduhr isn't running or its integration isn't installed:
   say so and stop.
+- **Know which Desk you have.** An answer with no `monitors` and no `wallpaper` is the Mac Desk: one
+  screen, no wallpaper numbers, no Launcher. Follow [On a Mac](#on-a-mac) wherever it differs from the
+  steps below. Go by what `get_desk` returns, not by guessing the user's OS.
 - **Read the tool descriptions.** They are the contract (fields, ranges, the pixel-sheet grammar).
   When this file and a tool description disagree, the tool description wins.
 
@@ -38,7 +41,8 @@ finishes it. The user presses Apply on every change. Your job is good proposals 
    only the fields that change. Each change gets one line of why, in the `note` and in chat.
 5. **Respect 3:1.** Every placed piece's ink must reach a WCAG contrast of 3:1 against the wallpaper
    under its anchor, on every monitor it shows on. Check before you send (below); a `rejected` answer
-   names the field to fix, so fix that field and call again.
+   names the field to fix, so fix that field and call again. Without wallpaper numbers (the Mac), you
+   can't measure it: ask what the wallpaper looks like and never state a contrast ratio.
 6. **OLED screens get OLED care.** See the OLED section; say it once, plainly, then respect it.
 
 ## The conversation
@@ -165,6 +169,29 @@ Once the look is applied, offer one thing that would finish it, the one that fit
 
 Offer one, maybe two. Don't run the list.
 
+## On a Mac
+
+When `get_desk` has no `monitors` and no `wallpaper`, it is Sanduhr for Mac. The conversation is the
+same; these parts change:
+
+- **Read the room from what is there**: `design.layout`, `shown`, `fonts`, `limits` and `sprites`. There
+  is one screen, so never ask which one, and never send `monitor`.
+- **Ask about the wallpaper** instead of reading it: "What's behind the Desk: dark, light, a busy photo?"
+  takes the screen question's place. Pick the ink from that answer. You can't measure contrast, so don't
+  quote a ratio; say why the ink should read ("light ink on the dark photo you described").
+- **OLED**: ask only when they describe a black wallpaper or say OLED. OLED care is in Settings ▸ Desk on
+  the Mac too.
+- **Fields the Mac Desk refuses**: `monitor`, the `launcher` and `glow` pieces, the `launcher`,
+  `messages`, `looks` and `theme` fields, and the ink words `auto`, `light`, `dark` and `theme`. Send ink
+  as one `#rrggbb` or a gradient of 2 to 4. Don't offer a Launcher; if they ask, say the Mac Desk has
+  none yet.
+- **Separate tools**: Desk message lines go through `propose_desk_messages`, song looks through
+  `propose_now_playing_looks`, a widget theme through `propose_theme`.
+- **After Apply**: every design waits for Apply on the Mac; there is no direct-change switch. There is no
+  list of saved designs either: Settings ▸ Desk ▸ Put my Desk back undoes the last Apply.
+
+See [references/example-mac-quiet-corner.md](references/example-mac-quiet-corner.md).
+
 ## Coming from Rainmeter
 
 When the user mentions Rainmeter (or a suite by name), offer to carry over **the look**, not the skin:
@@ -224,3 +251,5 @@ setting in the first proposal's notes only.
   fold, like a Knighthawk suite, on a black second screen: slim meters, a launcher for the logo.
 - [references/example-sunset-fold.md](references/example-sunset-fold.md): a fold on a dark wallpaper
   with a weather nickname and song looks.
+- [references/example-mac-quiet-corner.md](references/example-mac-quiet-corner.md): the Mac Desk on
+  one screen: asks about the wallpaper, slim meters, no Launcher.
