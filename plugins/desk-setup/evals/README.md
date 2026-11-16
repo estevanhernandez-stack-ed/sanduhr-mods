@@ -35,9 +35,14 @@ A case is a single prompt: `claude plugin eval` doesn't script follow-up replies
 claude plugin eval plugins/desk-setup --eval-dir evals-mac --trust-plugin --no-publish -j 6 --max-cost-usd 8
 ```
 
-- `evals-mac/mocks/sanduhr/_tools.json` is the Mac Sanduhr MCP server's `tools/list` (2.43.2), the same seven Desk tools.
+- `evals-mac/mocks/sanduhr/_tools.json` is the Mac Sanduhr MCP server's `tools/list` (2.44.0), the same seven Desk tools.
 - `fixtures/mac-one-screen.json` is a made-up `desk-state.json` passed through the Mac server's own `get_desk`: no
-  `monitors`, `wallpaper`, `start_menu_apps`, `designs` or `direct`, which is how the skill tells the Mac Desk apart.
+  `monitors`, `wallpaper`, `start_menu_apps`, `designs` or `direct`: a Mac before 2.44, one screen. No `wallpaper` is
+  how the skill tells the Mac Desk apart.
+- `mac-two-screens-asks-which` and `mac-places-on-the-second-display` swap in `fixtures/mac-two-screens.json`, a
+  made-up 2.44.0 state passed through the Mac server's `get_desk`: two `monitors` (the built-in main display and a
+  2560×1440 one to its right) and each placed piece's `monitor`, still no `wallpaper`.
 - The cases check the Mac branch of the skill: ask about the wallpaper instead of which screen, send no `monitor`,
-  `launcher`, `glow` or ink word, and put a message line through `propose_desk_messages`.
+  `launcher`, `glow` or ink word, and put a message line through `propose_desk_messages`. With two displays they ask
+  which one by name and place a piece by the `id` from `monitors`.
 

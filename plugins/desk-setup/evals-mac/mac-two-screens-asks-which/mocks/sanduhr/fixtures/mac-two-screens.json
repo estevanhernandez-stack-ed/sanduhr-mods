@@ -1,0 +1,139 @@
+{
+ "status": "ok",
+ "design": {
+  "layout": {
+   "clock": {
+    "anchor": "bl",
+    "size": 1,
+    "hidden": false,
+    "tilt": 0,
+    "monitor": "main"
+   },
+   "claude": {
+    "anchor": "bl",
+    "size": 1,
+    "hidden": false,
+    "tilt": 0,
+    "style": "bar",
+    "monitor": "main"
+   },
+   "nowPlaying": {
+    "anchor": "bc",
+    "size": 1,
+    "hidden": false,
+    "tilt": 0,
+    "monitor": "main"
+   },
+   "message": {
+    "hidden": true
+   },
+   "meters": {
+    "hidden": true
+   },
+   "telemetry": {
+    "hidden": true
+   },
+   "weather": {
+    "hidden": true
+   },
+   "watchers": {
+    "hidden": true
+   },
+   "meetings": {
+    "hidden": true
+   },
+   "companion": {
+    "hidden": true
+   }
+  },
+  "font": "EsteFont Pro",
+  "ink": "#ffffff",
+  "plate": false,
+  "shadow": true
+ },
+ "pieces": [
+  "message",
+  "clock",
+  "claude",
+  "meters",
+  "nowPlaying",
+  "telemetry",
+  "weather",
+  "watchers",
+  "meetings",
+  "companion"
+ ],
+ "anchors": [
+  "tl",
+  "tc",
+  "tr",
+  "ml",
+  "mr",
+  "bl",
+  "bc",
+  "br"
+ ],
+ "fonts": {
+  "desk": "EsteFont Pro",
+  "message": "",
+  "installed": [
+   "Helvetica Neue",
+   "Avenir Next",
+   "Menlo",
+   "SF Mono"
+  ],
+  "bundled": [
+   "EsteFont Pro",
+   "EsteFont 26"
+  ]
+ },
+ "monitors": [
+  {
+   "id": "5E1F0C2A-7B3D-4C9E-8A61-0F2B9D3E4A17",
+   "name": "1512×982, main",
+   "width": 1512,
+   "height": 982,
+   "primary": true,
+   "left": 0,
+   "top": 0
+  },
+  {
+   "id": "A93C6D10-2E4F-4B85-9D27-61C8F0B5E3D2",
+   "name": "2560×1440, right of main",
+   "width": 2560,
+   "height": 1440,
+   "primary": false,
+   "left": 1512,
+   "top": -229
+  }
+ ],
+ "shown": [
+  "clock",
+  "claude",
+  "nowPlaying"
+ ],
+ "message_color": "9ad7ff",
+ "notch_text_color": "ffffff",
+ "limits": {
+  "piece_tilt": {
+   "min": -20,
+   "max": 20
+  },
+  "piece_style": {
+   "pieces": [
+    "claude",
+    "meters",
+    "telemetry"
+   ],
+   "values": [
+    "bar",
+    "slim",
+    "ring",
+    "ticks"
+   ],
+   "default": "bar"
+  }
+ },
+ "sprites": [],
+ "writer_version": "2.44.0"
+}
