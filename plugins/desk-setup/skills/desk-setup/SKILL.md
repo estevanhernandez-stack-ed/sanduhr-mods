@@ -19,9 +19,11 @@ finishes it. The user presses Apply on every change. Your job is good proposals 
 - **Call `get_desk` first, every session.** Design from what it returns, never from memory. If it
   answers `no_data` with reason `missing`, Sanduhr isn't running or its integration isn't installed:
   say so and stop.
-- **Know which Desk you have.** An answer with no `monitors` and no `wallpaper` is the Mac Desk: one
-  screen, no wallpaper numbers, no Launcher. Follow [On a Mac](#on-a-mac) wherever it differs from the
-  steps below. Go by what `get_desk` returns, not by guessing the user's OS.
+- **Know which Desk you have.** An answer with no `wallpaper` is the Mac Desk: no wallpaper numbers, no
+  Launcher. Follow [On a Mac](#on-a-mac) wherever it differs from the steps below. Decide the two keys
+  separately: `wallpaper` absent means the Mac, and `monitors` tells you the screens on either platform
+  (a Mac before 2.44 has no `monitors`: one screen). Go by what `get_desk` returns, not by guessing the
+  user's OS.
 - **Read the tool descriptions.** They are the contract (fields, ranges, the pixel-sheet grammar).
   When this file and a tool description disagree, the tool description wins.
 
@@ -171,18 +173,26 @@ Offer one, maybe two. Don't run the list.
 
 ## On a Mac
 
-When `get_desk` has no `monitors` and no `wallpaper`, it is Sanduhr for Mac. The conversation is the
-same; these parts change:
+When `get_desk` has no `wallpaper`, it is Sanduhr for Mac. The conversation is the same; these parts
+change:
 
-- **Read the room from what is there**: `design.layout`, `shown`, `fonts`, `limits` and `sprites`. There
-  is one screen, so never ask which one, and never send `monitor`.
+- **Read the room from what is there**: `design.layout`, `shown`, `fonts`, `limits`, `sprites` and, from
+  2.44, `monitors`.
+- **Screens come from `monitors`.** No `monitors` (before 2.44), or a list of one: there is one screen,
+  so never ask which one, and never send `monitor`. Two or more: ask which screen the Desk is for, by
+  each one's `name` ("2560×1440, right of main"), as on Windows. Every placed piece reports its
+  `monitor`: `"main"` (the menu bar display, where every piece starts), `"all"`, or a display id. Send
+  `monitor` only for a piece that moves, as `"main"`, `"all"` or an `id` copied from `monitors`; a
+  piece on a display that is unplugged shows on the main one until it comes back.
 - **Ask about the wallpaper** instead of reading it: "What's behind the Desk: dark, light, a busy photo?"
-  takes the screen question's place. Pick the ink from that answer. You can't measure contrast, so don't
-  quote a ratio; say why the ink should read ("light ink on the dark photo you described").
+  With one screen it takes the screen question's place; with two, ask about the wallpaper on the screen
+  they pick. Pick the ink from that answer. You can't measure contrast, so don't quote a ratio; say why
+  the ink should read ("light ink on the dark photo you described").
 - **OLED**: ask only when they describe a black wallpaper or say OLED. OLED care is in Settings ▸ Desk on
   the Mac too.
-- **Fields the Mac Desk refuses**: `monitor`, the `launcher` and `glow` pieces, the `launcher`,
-  `messages`, `looks` and `theme` fields, and the ink words `auto`, `light`, `dark` and `theme`. Send ink
+- **Fields the Mac Desk refuses**: `monitor` before 2.44 (no `monitors` in `get_desk`), the `launcher`
+  and `glow` pieces, the `launcher`, `messages`, `looks` and `theme` fields, and the ink words `auto`,
+  `light`, `dark` and `theme`. Send ink
   as one `#rrggbb` or a gradient of 2 to 4. Don't offer a Launcher; if they ask, say the Mac Desk has
   none yet.
 - **Separate tools**: Desk message lines go through `propose_desk_messages`, song looks through

@@ -43,7 +43,7 @@ claude plugin install <plugin>@sanduhr-mods
   claude plugin install page-pane --marketplace estevanhernandez-stack-ed/sanduhr-mods
   ```
 
-- **desk-setup** 0.2.0: A Claude Code skill that sets up your Sanduhr Desk as a conversation: it reads the screen and wallpaper, asks a few short questions, proposes a small look you Apply on the live preview, then offers a finishing widget such as a pixel companion or song looks. Windows, Sanduhr 3.7 or later (widgets need 3.8); Mac, Sanduhr 2.37 or later, one screen and no Launcher.
+- **desk-setup** 0.2.1: A Claude Code skill that sets up your Sanduhr Desk as a conversation: it reads the screen and wallpaper, asks a few short questions, proposes a small look you Apply on the live preview, then offers a finishing widget such as a pixel companion or song looks. Windows, Sanduhr 3.7 or later (widgets need 3.8); Mac, Sanduhr 2.37 or later (a piece per display needs 2.44), no Launcher.
 
   ```
   claude plugin install desk-setup --marketplace estevanhernandez-stack-ed/sanduhr-mods
